@@ -7,6 +7,7 @@ from sf_user_object_access.core import (
     format_crud,
     format_object_with_crud,
     is_custom_object,
+    is_managed_object,
     is_standard_object,
     make_object_filter,
     merge_crud,
@@ -55,6 +56,22 @@ class TestIsStandardObject:
         assert is_standard_object("My_Object") is True
 
 
+# ─── is_managed_object ────────────────────────────────────────────────────────
+
+class TestIsManagedObject:
+    def test_namespaced_custom(self):
+        assert is_managed_object("NS__Obj__c") is True
+
+    def test_multi_segment_namespace(self):
+        assert is_managed_object("CBI_PKG__Config__c") is True
+
+    def test_first_party_custom(self):
+        assert is_managed_object("Bukken__c") is False
+
+    def test_standard(self):
+        assert is_managed_object("Account") is False
+
+
 # ─── make_object_filter ───────────────────────────────────────────────────────
 
 class TestMakeObjectFilter:
@@ -69,11 +86,18 @@ class TestMakeObjectFilter:
         assert f("Account") is True
         assert f("Bukken__c") is False
 
+    def test_managed_filter(self):
+        f = make_object_filter("managed")
+        assert f("NS__Obj__c") is True
+        assert f("CBI_PKG__Config__c") is True
+        assert f("Bukken__c") is False
+        assert f("Account") is False
+
     def test_all_filter(self):
         f = make_object_filter("all")
         assert f("Account") is True
         assert f("Bukken__c") is True
-        assert f("NS__Obj__c") is False  # 管理パッケージは除外
+        assert f("NS__Obj__c") is True  # managed も含む
 
 
 # ─── record_to_crud_set ───────────────────────────────────────────────────────

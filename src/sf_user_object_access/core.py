@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Literal
 
 
-ObjectType = Literal["custom", "standard", "all"]
+ObjectType = Literal["custom", "standard", "managed", "all"]
 
 # CRUD フラグの順序
 _CRUD_FLAGS = [
@@ -67,14 +67,21 @@ def is_standard_object(name: str) -> bool:
     return not name.endswith("__c") and "__" not in name
 
 
+def is_managed_object(name: str) -> bool:
+    """管理パッケージオブジェクトか判定する。__c で終わり __ が2組以上 (例: NS__Obj__c)。"""
+    return name.endswith("__c") and name.count("__") >= 2
+
+
 def make_object_filter(object_type: ObjectType):
     """object_type に応じたフィルタ関数を返す。"""
     if object_type == "custom":
         return is_custom_object
     if object_type == "standard":
         return is_standard_object
+    if object_type == "managed":
+        return is_managed_object
     # "all"
-    return lambda name: is_custom_object(name) or is_standard_object(name)
+    return lambda name: is_custom_object(name) or is_standard_object(name) or is_managed_object(name)
 
 
 # ─── CRUD helpers ─────────────────────────────────────────────────────────────

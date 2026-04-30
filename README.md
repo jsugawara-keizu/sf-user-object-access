@@ -76,7 +76,8 @@ sf-user-object-access --org <alias>
 |---|---|
 | `custom` | 自社開発カスタムオブジェクトのみ（namespace なし `__c`）。CSV カラム名は `CustomObjectCount` / `CustomObjects`（後方互換） |
 | `standard` | 標準オブジェクトのみ（`Account`、`Contact` など）。CSV カラム名は `ObjectCount` / `Objects` |
-| `all` | カスタム + 標準の両方。CSV カラム名は `ObjectCount` / `Objects` |
+| `managed` | 管理パッケージオブジェクトのみ（namespace あり `__c`、例: `NS__Obj__c`）。CSV カラム名は `ObjectCount` / `Objects` |
+| `all` | standard + custom + managed の全種別。CSV カラム名は `ObjectCount` / `Objects` |
 
 ### 使用例
 
@@ -86,6 +87,9 @@ sf-user-object-access --org sampleorg
 
 # 標準オブジェクトへのアクセス確認
 sf-user-object-access --org sampleorg --object-type standard --out standard_access.csv
+
+# 管理パッケージオブジェクトのみ
+sf-user-object-access --org sampleorg --object-type managed --out managed_access.csv
 
 # すべてのオブジェクトを出力
 sf-user-object-access --org sampleorg --object-type all --out full_access.csv

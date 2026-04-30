@@ -31,14 +31,15 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--object-type",
-        choices=["custom", "standard", "all"],
+        choices=["custom", "standard", "managed", "all"],
         default="custom",
         dest="object_type",
         help=(
             "対象オブジェクト種別 (デフォルト: custom)\n"
             "  custom   - 自社開発カスタムオブジェクトのみ (namespace なし __c)\n"
             "  standard - 標準オブジェクトのみ\n"
-            "  all      - カスタム + 標準の両方"
+            "  managed  - 管理パッケージオブジェクトのみ (namespace あり __c)\n"
+            "  all      - standard + custom + managed の全種別"
         ),
     )
     return p.parse_args()
