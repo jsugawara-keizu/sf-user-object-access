@@ -95,7 +95,7 @@ sf-user-object-access --org sampleorg
 # 標準オブジェクトへのアクセス確認
 sf-user-object-access --org sampleorg --object-type standard --out standard_access.csv
 
-# 管理パッケージオブジェクトのみ
+# 管理パッケージオブジェクトへのアクセス確認
 sf-user-object-access --org sampleorg --object-type managed --out managed_access.csv
 
 # すべてのオブジェクトを出力
