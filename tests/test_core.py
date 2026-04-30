@@ -232,3 +232,12 @@ class TestFlatten:
         result = flatten(r)
         assert "attributes" not in result
         assert result["Id"] == "0Pa000"
+
+# ─── format_crud (expand 出力確認) ───────────────────────────────────────────
+
+class TestFormatCrudExpand:
+    def test_crudvm_order(self):
+        assert format_crud({"M", "V", "D", "U", "R", "C"}) == "CRUDVM"
+
+    def test_permissions_only_vm(self):
+        assert format_crud({"V", "M"}) == "VM"

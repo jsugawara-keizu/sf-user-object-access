@@ -75,6 +75,7 @@ sf-user-object-access --org <alias>
 | `--org` | （必須） | 対象 org の alias または username |
 | `--out` | `user_object_access.csv` | 出力 CSV ファイルパス |
 | `--object-type` | `custom` | 対象オブジェクト種別（後述） |
+| `--expand` | `false` | 1オブジェクト1行で展開出力する |
 
 ### `--object-type` の値
 
@@ -100,6 +101,9 @@ sf-user-object-access --org sampleorg --object-type managed --out managed_access
 # すべてのオブジェクトを出力
 sf-user-object-access --org sampleorg --object-type all --out full_access.csv
 
+# 1オブジェクト1行で展開出力
+sf-user-object-access --org sampleorg --expand --out expanded_access.csv
+
 # 出力先を指定
 sf-user-object-access --org sampleorg --out org-state/user_permissions/user_custom_object_access.csv
 ```
@@ -117,10 +121,21 @@ sf-user-object-access --org sampleorg --out org-state/user_permissions/user_cust
 | `CustomObjectCount` / `ObjectCount` | アクセス可能なオブジェクト数 |
 | `CustomObjects` / `Objects` | オブジェクトと CRUD 権限の一覧（`;` 区切り） |
 
-### オブジェクト表示形式
+### オブジェクト表示形式（通常）
 
 ```
 Bukken__c[CRUD];Account[CRU];Contact[CR]
+```
+
+### `--expand` 展開形式
+
+`--expand` を指定すると、1オブジェクト1行で出力されます。`CustomObjects`/`Objects` カラムの代わりに `Object`・`Permissions` カラムになります。
+
+```
+Username,          Name, Profile, Role, PermissionSetGroups, PermissionSets, Object,      Permissions
+user1@example.com, ...,  ...,     ...,  ...,                 ...,            Account,     CRU
+user1@example.com, ...,  ...,     ...,  ...,                 ...,            Bukken__c,   CRUD
+user2@example.com, ...,  ...,     ...,  ...,                 ...,            Contact,     R
 ```
 
 CRUD 文字の意味:

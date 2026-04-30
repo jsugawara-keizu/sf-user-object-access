@@ -114,7 +114,7 @@ def format_object_with_crud(sobject: str, crud_set: set[str]) -> str:
 
 # ─── Main logic ───────────────────────────────────────────────────────────────
 
-def run(org: str, out_path: Path, object_type: ObjectType = "custom") -> None:
+def run(org: str, out_path: Path, object_type: ObjectType = "custom", expand: bool = False) -> None:
     """メイン処理: Salesforce からデータを取得し CSV を出力する。"""
 
     obj_filter = make_object_filter(object_type)
@@ -224,52 +224,69 @@ def run(org: str, out_path: Path, object_type: ObjectType = "custom") -> None:
                 _merge_ps_objects(assignee_id, ps_id)
 
     # 5. CSV 出力
-    # カラム名: custom モードのみ後方互換の "CustomObject*" を使用
-    if object_type == "custom":
-        count_col = "CustomObjectCount"
-        objects_col = "CustomObjects"
-    else:
-        count_col = "ObjectCount"
-        objects_col = "Objects"
+    _USER_BASE_FIELDS = ["Username", "Name", "Profile", "Role", "PermissionSetGroups", "PermissionSets"]
 
-    rows = []
-    for assignee_id, meta in sorted(user_meta.items(), key=lambda x: x[1]["Username"]):
-        obj_map = user_objects.get(assignee_id, {})
-        # sobject をソートして "SObject[CRUD]" 形式の文字列リストを作成
-        formatted_objs = [
-            format_object_with_crud(sobject, crud)
-            for sobject, crud in sorted(obj_map.items())
-        ]
-        rows.append({
+    def _base(assignee_id: str, meta: dict) -> dict:
+        return {
             "Username":            meta["Username"],
             "Name":                meta["Name"],
             "Profile":             meta["Profile"],
             "Role":                meta["Role"],
             "PermissionSetGroups": ";".join(sorted(user_psgps.get(assignee_id, set()))),
             "PermissionSets":      ";".join(sorted(user_psets.get(assignee_id, set()))),
-            count_col:             len(formatted_objs),
-            objects_col:           ";".join(formatted_objs),
-        })
+        }
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = [
-        "Username", "Name", "Profile", "Role",
-        "PermissionSetGroups", "PermissionSets",
-        count_col, objects_col,
-    ]
-    with open(out_path, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
-        w.writeheader()
-        w.writerows(rows)
 
-    # 6. サマリー表示
-    print(f"\n出力: {out_path}  ({len(rows)} ユーザー)")
-    if object_type == "custom":
-        over10 = [r for r in rows if r[count_col] > 10]
-        print(f"LPS 超過（10超え）: {len(over10)} ユーザー")
-        if over10:
-            from collections import Counter
-            profile_dist = Counter(r["Profile"] for r in over10)
-            print("プロファイル別内訳:")
-            for profile, count in profile_dist.most_common():
-                print(f"  {count:4d}  {profile}")
+    if expand:
+        fieldnames = _USER_BASE_FIELDS + ["Object", "Permissions"]
+        rows = []
+        for assignee_id, meta in sorted(user_meta.items(), key=lambda x: x[1]["Username"]):
+            obj_map = user_objects.get(assignee_id, {})
+            for sobject, crud in sorted(obj_map.items()):
+                rows.append({**_base(assignee_id, meta), "Object": sobject, "Permissions": format_crud(crud)})
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=fieldnames)
+            w.writeheader()
+            w.writerows(rows)
+        user_count = len({r["Username"] for r in rows})
+        print(f"\n出力: {out_path}  ({user_count} ユーザー / {len(rows)} 行)")
+    else:
+        # カラム名: custom モードのみ後方互換の "CustomObject*" を使用
+        if object_type == "custom":
+            count_col = "CustomObjectCount"
+            objects_col = "CustomObjects"
+        else:
+            count_col = "ObjectCount"
+            objects_col = "Objects"
+
+        rows = []
+        for assignee_id, meta in sorted(user_meta.items(), key=lambda x: x[1]["Username"]):
+            obj_map = user_objects.get(assignee_id, {})
+            formatted_objs = [
+                format_object_with_crud(sobject, crud)
+                for sobject, crud in sorted(obj_map.items())
+            ]
+            rows.append({
+                **_base(assignee_id, meta),
+                count_col:   len(formatted_objs),
+                objects_col: ";".join(formatted_objs),
+            })
+
+        fieldnames = _USER_BASE_FIELDS + [count_col, objects_col]
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            w = csv.DictWriter(f, fieldnames=fieldnames)
+            w.writeheader()
+            w.writerows(rows)
+
+        # 6. サマリー表示
+        print(f"\n出力: {out_path}  ({len(rows)} ユーザー)")
+        if object_type == "custom":
+            over10 = [r for r in rows if r[count_col] > 10]
+            print(f"LPS 超過（10超え）: {len(over10)} ユーザー")
+            if over10:
+                from collections import Counter
+                profile_dist = Counter(r["Profile"] for r in over10)
+                print("プロファイル別内訳:")
+                for profile, count in profile_dist.most_common():
+                    print(f"  {count:4d}  {profile}")

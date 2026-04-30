@@ -42,6 +42,12 @@ def parse_args() -> argparse.Namespace:
             "  all      - standard + custom + managed の全種別"
         ),
     )
+    p.add_argument(
+        "--expand",
+        action="store_true",
+        default=False,
+        help="1オブジェクト1行で展開出力する (デフォルト: ユーザー1行にまとめる)",
+    )
     return p.parse_args()
 
 
@@ -49,7 +55,7 @@ def main() -> None:
     args = parse_args()
     object_type: ObjectType = args.object_type  # type: ignore[assignment]
     try:
-        run(org=args.org, out_path=Path(args.out), object_type=object_type)
+        run(org=args.org, out_path=Path(args.out), object_type=object_type, expand=args.expand)
     except RuntimeError as e:
         print(f"[error] {e}", file=sys.stderr)
         sys.exit(1)
