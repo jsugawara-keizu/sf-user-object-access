@@ -48,6 +48,12 @@ pipx install git+https://github.com/jsugawara-keizu/sf-user-object-access.git
 
 インストール後はどのディレクトリからでも実行できます。
 
+アップデートする場合:
+
+```bash
+pipx upgrade sf-user-object-access
+```
+
 ### pip / uv を使う方法
 
 ```bash
