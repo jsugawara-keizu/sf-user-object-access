@@ -112,6 +112,21 @@ class TestRecordToCrudSet:
         }
         assert record_to_crud_set(r) == {"C", "R", "U", "D"}
 
+    def test_full_crudvm(self):
+        r = {
+            "PermissionsCreate": True,
+            "PermissionsRead": True,
+            "PermissionsEdit": True,
+            "PermissionsDelete": True,
+            "PermissionsViewAllRecords": True,
+            "PermissionsModifyAllRecords": True,
+        }
+        assert record_to_crud_set(r) == {"C", "R", "U", "D", "V", "M"}
+
+    def test_view_all_only(self):
+        r = {"PermissionsViewAllRecords": True, "PermissionsModifyAllRecords": False}
+        assert record_to_crud_set(r) == {"V"}
+
     def test_read_only(self):
         r = {
             "PermissionsCreate": False,
@@ -153,6 +168,15 @@ class TestFormatCrud:
     def test_full_crud(self):
         assert format_crud({"C", "R", "U", "D"}) == "CRUD"
 
+    def test_full_crudvm(self):
+        assert format_crud({"C", "R", "U", "D", "V", "M"}) == "CRUDVM"
+
+    def test_view_all(self):
+        assert format_crud({"R", "V"}) == "RV"
+
+    def test_modify_all(self):
+        assert format_crud({"C", "R", "U", "D", "M"}) == "CRUDM"
+
     def test_read_only(self):
         assert format_crud({"R"}) == "R"
 
@@ -160,7 +184,6 @@ class TestFormatCrud:
         assert format_crud({"U", "C", "R"}) == "CRU"
 
     def test_order_is_fixed(self):
-        # D と C のみでも C→D 順になること
         assert format_crud({"D", "C"}) == "CD"
 
     def test_empty(self):

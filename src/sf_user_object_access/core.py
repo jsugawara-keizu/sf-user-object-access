@@ -16,6 +16,8 @@ _CRUD_FLAGS = [
     ("PermissionsRead", "R"),
     ("PermissionsEdit", "U"),
     ("PermissionsDelete", "D"),
+    ("PermissionsViewAllRecords", "V"),
+    ("PermissionsModifyAllRecords", "M"),
 ]
 
 
@@ -122,10 +124,12 @@ def run(org: str, out_path: Path, object_type: ObjectType = "custom") -> None:
     print("ObjectPermissions を取得中...")
     obj_perms = soql(
         "SELECT ParentId, SobjectType, "
-        "PermissionsCreate, PermissionsRead, PermissionsEdit, PermissionsDelete "
+        "PermissionsCreate, PermissionsRead, PermissionsEdit, PermissionsDelete, "
+        "PermissionsViewAllRecords, PermissionsModifyAllRecords "
         "FROM ObjectPermissions "
         "WHERE PermissionsRead = true OR PermissionsCreate = true "
         "OR PermissionsEdit = true OR PermissionsDelete = true "
+        "OR PermissionsViewAllRecords = true OR PermissionsModifyAllRecords = true "
         "LIMIT 50000",
         org,
     )
