@@ -75,7 +75,7 @@ sf-user-object-access --org <alias>
 | `--org` | （必須） | 対象 org の alias または username |
 | `--out` | `user_object_access.csv` | 出力 CSV ファイルパス |
 | `--object-type` | `custom` | 対象オブジェクト種別（後述） |
-| `--expand` | `false` | 1オブジェクト1行で展開出力する |
+| `--expand` | `false` | 1オブジェクト1列のピボット形式で出力する |
 
 ### `--object-type` の値
 
@@ -127,15 +127,14 @@ sf-user-object-access --org sampleorg --out org-state/user_permissions/user_cust
 Bukken__c[CRUD];Account[CRU];Contact[CR]
 ```
 
-### `--expand` 展開形式
+### `--expand` ピボット形式
 
-`--expand` を指定すると、1オブジェクト1行で出力されます。`CustomObjects`/`Objects` カラムの代わりに `Object`・`Permissions` カラムになります。
+`--expand` を指定すると、オブジェクトごとに1列を追加したピボット形式で出力されます。セルの値は権限文字列（`CRU` など）、アクセスなしの場合は空になります。
 
 ```
-Username,          Name, Profile, Role, PermissionSetGroups, PermissionSets, Object,      Permissions
-user1@example.com, ...,  ...,     ...,  ...,                 ...,            Account,     CRU
-user1@example.com, ...,  ...,     ...,  ...,                 ...,            Bukken__c,   CRUD
-user2@example.com, ...,  ...,     ...,  ...,                 ...,            Contact,     R
+Username,          ..., Account, Bukken__c, Contact
+user1@example.com, ..., CRU,     CRUD,
+user2@example.com, ..., ,        ,          R
 ```
 
 CRUD 文字の意味:

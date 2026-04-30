@@ -239,18 +239,21 @@ def run(org: str, out_path: Path, object_type: ObjectType = "custom", expand: bo
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     if expand:
-        fieldnames = _USER_BASE_FIELDS + ["Object", "Permissions"]
+        # 全オブジェクトをソートして列名に使う
+        all_objects = sorted({o for obj_map in user_objects.values() for o in obj_map})
+        fieldnames = _USER_BASE_FIELDS + all_objects
         rows = []
         for assignee_id, meta in sorted(user_meta.items(), key=lambda x: x[1]["Username"]):
             obj_map = user_objects.get(assignee_id, {})
-            for sobject, crud in sorted(obj_map.items()):
-                rows.append({**_base(assignee_id, meta), "Object": sobject, "Permissions": format_crud(crud)})
+            row = {**_base(assignee_id, meta)}
+            for sobject in all_objects:
+                row[sobject] = format_crud(obj_map[sobject]) if sobject in obj_map else ""
+            rows.append(row)
         with open(out_path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(rows)
-        user_count = len({r["Username"] for r in rows})
-        print(f"\n出力: {out_path}  ({user_count} ユーザー / {len(rows)} 行)")
+        print(f"\n出力: {out_path}  ({len(rows)} ユーザー / {len(all_objects)} オブジェクト列)")
     else:
         # カラム名: custom モードのみ後方互換の "CustomObject*" を使用
         if object_type == "custom":

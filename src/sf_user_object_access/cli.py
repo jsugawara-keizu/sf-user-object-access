@@ -46,7 +46,7 @@ def parse_args() -> argparse.Namespace:
         "--expand",
         action="store_true",
         default=False,
-        help="1オブジェクト1行で展開出力する (デフォルト: ユーザー1行にまとめる)",
+        help="1オブジェクト1列のピボット形式で出力する (デフォルト: ユーザー1行にまとめる)",
     )
     return p.parse_args()
 

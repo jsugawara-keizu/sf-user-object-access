@@ -241,3 +241,7 @@ class TestFormatCrudExpand:
 
     def test_permissions_only_vm(self):
         assert format_crud({"V", "M"}) == "VM"
+
+    def test_empty_means_no_access(self):
+        # ピボット列でアクセスなしは空文字
+        assert format_crud(set()) == ""
