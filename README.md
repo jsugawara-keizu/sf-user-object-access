@@ -82,16 +82,16 @@ sf-user-object-access --org <alias>
 
 ```bash
 # カスタムオブジェクトのみ（LPS 制限チェック用）
-sf-user-object-access --org hk.prod
+sf-user-object-access --org sampleorg
 
 # 標準オブジェクトへのアクセス確認
-sf-user-object-access --org hk.prod --object-type standard --out standard_access.csv
+sf-user-object-access --org sampleorg --object-type standard --out standard_access.csv
 
 # すべてのオブジェクトを出力
-sf-user-object-access --org hk.prod --object-type all --out full_access.csv
+sf-user-object-access --org sampleorg --object-type all --out full_access.csv
 
 # 出力先を指定
-sf-user-object-access --org hk.prod --out org-state/user_permissions/user_custom_object_access.csv
+sf-user-object-access --org sampleorg --out org-state/user_permissions/user_custom_object_access.csv
 ```
 
 ## 出力 CSV の形式
